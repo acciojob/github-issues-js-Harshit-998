@@ -1,40 +1,38 @@
 //your code here
 
-const issuesList = document.getElementById("issues-list");
-let currentPage = 1;
+let pageNumberHere = 1;
+async function fetchData() {
+  let url = `https://api.github.com/repositories/1296269/issues?page=${pageNumberHere}&per_page=5`;
+  const result = await fetch(url);
+  const data = await result.json();
 
-// Fetch issues from the GitHub API and display them in the list
-async function fetchIssues(pageNumber) {
-  const apiUrl = `https://api.github.com/repositories/1296269/issues?page=${pageNumber}&per_page=5`;
-  const response = await fetch(apiUrl);
-  const issues = await response.json();
-  issuesList.innerHTML = "";
-  issues.forEach((issue) => {
-    const issueItem = document.createElement("li");
-    issueItem.textContent = issue.title;
-    issuesList.appendChild(issueItem);
+  let pageNumber = document.getElementById("page-number");
+  pageNumber.innerHTML = "Page Number " + pageNumberHere;
+
+  let ol = document.createElement("ol");
+
+  data.map((issue) => {
+    ol.innerHTML += `<li>${issue.title} ${issue.number}</li>`;
   });
+
+  let dataDiv = document.getElementById("issues");
+  dataDiv.innerHTML = "";
+  dataDiv.appendChild(ol);
 }
 
-// Load the first page of issues on page load
-window.addEventListener("load", () => {
-  fetchIssues(currentPage);
-});
+fetchData();
 
-// Load the previous page of issues and update the page number
-const loadPrevButton = document.getElementById("load-prev");
-loadPrevButton.addEventListener("click", () => {
-  if (currentPage > 1) {
-    currentPage--;
-    document.querySelector("h1").textContent = `Page number ${currentPage}`;
-    fetchIssues(currentPage);
+function next() {
+  pageNumberHere++;
+
+  fetchData();
+}
+
+function prev() {
+  if (pageNumberHere >= 2) {
+    pageNumberHere--;
+    fetchData();
   }
-});
 
-// Load the next page of issues and update the page number
-const loadNextButton = document.getElementById("load-next");
-loadNextButton.addEventListener("click", () => {
-  currentPage++;
-  document.querySelector("h1").textContent = `Page number ${currentPage}`;
-  fetchIssues(currentPage);
-});
+  return;
+}
